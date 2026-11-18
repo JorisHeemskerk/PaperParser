@@ -213,7 +213,7 @@ def create_app(settings: Settings) -> FastAPI:
             skip = req.get("skip") or {}
             mask = skip_mask(skip.get("references", True), skip.get("citations", True), skip.get("headers", True))
             voice = req.get("voice") if req.get("voice") in {v.id for v in engine.voices()} else DEFAULT_VOICE
-            speed = min(max(float(req.get("speed", 1.0)), 0.5), 2.5)
+            speed = min(max(float(req.get("speed", 1.0)), 0.5), 3.5)
             if engine.state != "ready":
                 await ws.send_json({"type": "status", "message": "Loading voice model…"})
             gen = stream_segments(engine, iter_segments(doc, int(req.get("start_word", 0)), mask), voice, speed)

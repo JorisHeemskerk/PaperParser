@@ -11,3 +11,5 @@ __pycache__/
 library/
 *.m4b
 *.wav
+
+voice_benchmark/
