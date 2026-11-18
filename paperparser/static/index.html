@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PaperParser</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M10 8h8l4 4v12H10z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- Projects -->
+  <aside id="projects" class="pane">
+    <header class="pane-head"><h1>PaperParser</h1></header>
+    <nav id="project-list" aria-label="Projects"></nav>
+    <button id="new-project" class="ghost wide">+ New project</button>
+    <footer id="engine-status" class="muted small"></footer>
+  </aside>
+
+  <!-- Paper list -->
+  <section id="papers" class="pane">
+    <header class="pane-head">
+      <input id="search" type="search" placeholder="Filter papers and notes…" autocomplete="off">
+      <button id="upload-btn" class="ghost" title="Upload PDFs (or drop them anywhere)">Upload</button>
+      <input id="upload-input" type="file" accept="application/pdf,.pdf" multiple hidden>
+    </header>
+    <div id="paper-list"></div>
+  </section>
+
+  <!-- Reader -->
+  <main id="reader">
+    <div id="toolbar">
+      <div id="doc-title" class="ellipsis"></div>
+      <div class="spacer"></div>
+      <span id="page-indicator" class="muted small"></span>
+      <div class="btn-group">
+        <button id="zoom-out" class="icon" title="Zoom out">−</button>
+        <button id="zoom-fit" class="ghost small" title="Fit to width"><span id="zoom-label">Fit</span></button>
+        <button id="zoom-in" class="icon" title="Zoom in">+</button>
+      </div>
+      <button id="toggle-details" class="ghost" title="Notes &amp; details">Notes</button>
+    </div>
+
+    <div id="viewer-scroll">
+      <div id="viewer"></div>
+      <div id="empty">
+        <h2>Select a paper</h2>
+        <p class="muted">Pick one from the list, or drop PDFs anywhere in this window.<br>
+          Double-click a word to start reading aloud from there.</p>
+      </div>
+    </div>
+
+    <div id="player" hidden>
+      <div class="player-main">
+        <button id="btn-prev" class="icon" title="Previous sentence (←)">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M6 6h2v12H6zM20 6v12L9.5 12z"/></svg>
+        </button>
+        <button id="btn-play" class="play" title="Play / pause (Space)">
+          <svg id="icon-play" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+          <svg id="icon-pause" viewBox="0 0 24 24" width="20" height="20" hidden><path fill="currentColor" d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+        </button>
+        <button id="btn-next" class="icon" title="Next sentence (→)">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M16 6h2v12h-2zM4 6l10.5 6L4 18z"/></svg>
+        </button>
+      </div>
+      <label class="field">
+        <span class="muted small">Voice</span>
+        <select id="voice"></select>
+      </label>
+      <label class="field">
+        <span class="muted small">Speed <b id="speed-label">1.0×</b></span>
+        <input id="speed" type="range" min="0.5" max="2" step="0.05" value="1">
+      </label>
+      <div class="chips" role="group" aria-label="Skip while reading">
+        <label class="chip" title="Don't read the reference list"><input type="checkbox" id="skip-references"><span>Refs</span></label>
+        <label class="chip" title="Don't read inline citations like [12] or (Smith, 2020)"><input type="checkbox" id="skip-citations"><span>Cites</span></label>
+        <label class="chip" title="Don't read running headers, footers and page numbers"><input type="checkbox" id="skip-headers"><span>Headers</span></label>
+        <label class="chip" title="Scroll to keep the spoken word in view"><input type="checkbox" id="follow"><span>Follow</span></label>
+      </div>
+      <div id="player-status" class="muted small ellipsis"></div>
+    </div>
+  </main>
+
+  <!-- Details & notes -->
+  <aside id="details" class="pane" hidden>
+    <div id="details-empty" class="muted small pad">No paper selected.</div>
+    <div id="details-body" hidden>
+      <label class="field block"><span class="muted small">Title</span><input id="d-title" type="text" placeholder="Title"></label>
+      <div class="row">
+        <div class="seg" id="d-status" role="group" aria-label="Reading status">
+          <button data-status="unread">Unread</button><button data-status="reading">Reading</button><button data-status="read">Read</button>
+        </div>
+        <button id="d-fav" class="icon" title="Favourite" aria-pressed="false">☆</button>
+      </div>
+      <div class="field block"><span class="muted small">Colour</span><div id="d-colors" class="swatches"></div></div>
+      <label class="field block"><span class="muted small">Group</span>
+        <input id="d-group" type="text" list="groups-list" placeholder="e.g. Background, Methods…"><datalist id="groups-list"></datalist></label>
+      <label class="field block"><span class="muted small">Tags (comma separated)</span><input id="d-tags" type="text" placeholder="transformers, survey"></label>
+      <label class="field block grow"><span class="muted small">Notes <span id="d-saved" class="saved"></span></span>
+        <textarea id="d-notes" placeholder="Your notes on this paper… (stored in metadata.json, not in the PDF)"></textarea></label>
+      <div id="d-meta" class="muted small"></div>
+    </div>
+  </aside>
+</div>
+
+<div id="drop-overlay" hidden><div>Drop PDFs to add them to <b id="drop-target"></b></div></div>
+<div id="toast" role="status" hidden></div>
+
+<dialog id="project-dialog">
+  <form method="dialog">
+    <h3>New project</h3>
+    <input id="project-name" name="name" type="text" placeholder="Project name" required autocomplete="off">
+    <menu>
+      <button value="cancel" class="ghost" formnovalidate>Cancel</button>
+      <button value="ok" class="primary">Create</button>
+    </menu>
+  </form>
+</dialog>
+
+<script type="module" src="/static/app.js"></script>
+</body>
+</html>

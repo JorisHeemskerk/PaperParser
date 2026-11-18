@@ -1,0 +1,23 @@
+# --- PaperParser app ---------------------------------------------------------
+fastapi
+uvicorn[standard]
+python-multipart
+pymupdf
+numpy
+kokoro>=0.9.4
+soundfile
+# Install a CUDA build of torch for your GPU *first* (see README), otherwise pip
+# pulls the CPU-only wheel:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+torch
+
+# --- legacy audiobook CLI (pdf_to_audiobook.py) -------------------------------
+ocrmypdf
+ebooklib
+beautifulsoup4
+lxml
+tqdm
+
+# --- development ------------------------------------------------------------
+pytest
+httpx
